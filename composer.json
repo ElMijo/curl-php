@@ -1,0 +1,25 @@
+{
+    "name":"ElMijo/curl-php",
+    "description": "Librebia para el uso de Curl",
+    "keywords": ["php","curl"],
+    "homepage": "https://github.com/ElMijo/curl-php",
+    "time": "2014-07-26",
+    "license": "GPL-3.0+",
+    "authors": [
+        {
+            "name": "Jerry Anselmi",
+            "email": "janselmi@mppi.gob.ve",
+            "role": "Desarrollador"
+        }
+    ],
+    "require": {
+        "php":">=5.3",
+        "ext-json":">=1.2"
+    },
+    "autoload": {
+        "psr-0": {
+            "": "src/"
+        }
+    }
+
+}
