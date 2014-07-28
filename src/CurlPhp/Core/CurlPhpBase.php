@@ -2,81 +2,73 @@
 
 namespace CurlPhp\Core;
 
-use CurlPhp\CurlPhpMensajes as MSG;
+use CurlPhp\Core\CurlPhpMensajes as MSG;
+use CurlPhp\Core\CurlPhpCabeceras;
+use CurlPhp\Core\CurlPhpError;
+use CurlPhp\Core\CurlPhpRespuesta;
+  
 
 /**
 * Clase que contiene los metodoa base de la conexión cURL
 */
-class CurlPhpBase
+class CurlPhpBase extends CurlPhpCabeceras
 {
-	
 	/**
  	* Versión de la clase
  	*/
 	const VERSION = '1.0';
 
 	/**
-   	* Respuesta de la ejecucion del objeto CuRL
-   	* @var String
-   	*/
-   	private $respuesta_pura = NULL;
-
-   	/**
- 	* Cabeceras de la peticion
- 	* @var array
- 	*/
-	private $cabeceras_solicitud  = array();
-
-	/**
-	 * Cabeceras de la Respuesta
-	 * @var array
-	 */
-	private $cabeceras_respuesta = array();
+  * Respuesta de la ejecucion del objeto CuRL
+  * @var String
+  */
+  private $respuesta_pura = NULL;
 
 	/**
  	* Cuerpo de la respuesta de la peticion
  	* @var string
  	*/
-	private $cuerpo_respuesta = '';
+	protected $cuerpo_respuesta = '';
 
 
 	/**
  	* Arreglo con los COOKIES que se desean incluir en el Request
  	* @var array
  	*/
-   	private $cookies = array();
+  protected $cookies = array();
 
-   	/**
-   	* Arreglo con los HEADERS que se desean incluir en el Request
-  	* @var array
-   	*/
-   	private $cabeceras = array();
-   	/**
-   	* Arreglo con las OPCIONES que se desean incluir en el Request
-   	* @var array
-   	*/
-   	private $opciones = array();
+  /**
+  * Arreglo con los cabeceras que se desean incluir en el Request
+  * @var array
+  */
+  protected $cabeceras = array();
+  /**
+  * Arreglo con las OPCIONES que se desean incluir en el Request
+  * @var array
+  */
+  protected $opciones = array();
 
-   	/**
-   	* Objeto CuRL
-   	* @var CuRL
-   	*/
-   	protected $curl             = NULL;
+  /**
+  * Objeto CuRL
+  * @var CuRL
+  */
+  protected $curl             = NULL;
 
 
 	function __construct()
 	{
-		if (!extension_loaded('curl')) {
+		if(!extension_loaded('curl')) {
 
-           	throw new \ErrorException(MSG::NO_EXTENCION_CURL);
+      throw new \ErrorException(MSG::NO_EXTENCION_CURL);
 
-       	}
+    }
 
 		$this->curl = curl_init();
 		$this->defineUserAgentPorDefecto();
-       	$this->definirOpcionCuRL(CURLINFO_HEADER_OUT, true);
-       	$this->definirOpcionCuRL(CURLOPT_HEADER, true);
-       	$this->definirOpcionCuRL(CURLOPT_RETURNTRANSFER, true);
+    $this->definirOpcionCuRL(CURLINFO_HEADER_OUT, true);
+    $this->definirOpcionCuRL(CURLOPT_HEADER, true);
+    $this->definirOpcionCuRL(CURLOPT_RETURNTRANSFER, true);
+
 	}
 
 
@@ -86,19 +78,21 @@ class CurlPhpBase
  	* @return CurlPhp
  	*/
 	public function defineUserAgent($user_agent = '')
-   	{
-       	$this->definirOpcionCuRL(CURLOPT_USERAGENT, $user_agent);
-       	return $this;
-   	}
+  {
 
-    /**
-   	 * Permite definir opociones propias de CuRL
-     * @param String                     $option     Cadena con el nombre de la opcion que se desea definir
-   	 * @param String|Boolean|Numeric     $value      Valor que se desea definir
-     * @param Boolean                                Devuelve TRUE si la operacion se realizo corectamente o FALSE en caso contrario
-   	 */
+   	$this->definirOpcionCuRL(CURLOPT_USERAGENT, $user_agent);
+
+   	return $this;
+  }
+
+  /**
+   * Permite definir opociones propias de CuRL
+   * @param String                     $option     Cadena con el nombre de la opcion que se desea definir
+   * @param String|Boolean|Numeric     $value      Valor que se desea definir
+   * @param Boolean                                Devuelve TRUE si la operacion se realizo corectamente o FALSE en caso contrario
+   */
 	public function definirOpcionCuRL($opcion, $valor)
-   	{
+  {
 
        	$opciones_requeridas = array(
            	CURLINFO_HEADER_OUT    => 'CURLINFO_HEADER_OUT',
@@ -211,8 +205,8 @@ class CurlPhpBase
    	*/
    	public function eliminarCabecera($key)
    	{
-       	$this->definirCabeceras($key, '');
-       	unset($this->headers[$key]);
+       	$this->definirCabeceras(array("$key" => ''));
+       	unset($this->cabeceras[$key]);
        	return $this;
    	}
 
@@ -228,11 +222,28 @@ class CurlPhpBase
    	}
 
 
+  protected function ejecurtarCurl()
+  {
 
+    $this->respuesta_pura = curl_exec($this->curl);
 
+    $cabeceras = '';
 
+    if (!(strpos($this->respuesta_pura, "\r\n\r\n") === false)) {
 
+      list($cabeceras,$this->cuerpo_respuesta) = explode("\r\n\r\n", trim($this->respuesta_pura));
 
+    }
+
+    $this->extraerCabeceras($cabeceras);
+
+    return (object)array(
+      "errores"   => new CurlPhpError($this->curl,$this->cabeceras_respuesta),
+      "respuesta" => new CurlPhpRespuesta($this->cabeceras_solicitud,$this->cabeceras_respuesta,$this->cuerpo_respuesta)
+    );
+
+    /*return */
+  }
 
 	/**
    	* Permite definir un User Agent por defecto
@@ -246,6 +257,16 @@ class CurlPhpBase
        	$user_agent .= ' curl/' . $curl_version['version'];
        	$this->defineUserAgent($user_agent);
        	return $this;
-   	}
+   }
+
+       /**
+     * Permite validar si un arrays es asociativo
+     * @param  Array      $array     Arreglo que se desea evaluar
+     * @return boolean               Devuelve TRUE si el arreglo es asociativo o FAÑSE en caso contrario
+     */
+    private function is_array_assoc($array = array())
+    {
+        return (bool)count(array_filter(array_keys($array), 'is_string'));
+    }
 }
 ?>

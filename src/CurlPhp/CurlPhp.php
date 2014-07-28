@@ -15,9 +15,13 @@ class CurlPhp extends CurlPhpBase
 	* Arreglo con los metodos que usan query-uri en su url
 	* @var array
 	*/
-	private $query_url_type = array('get','delete','head','options');
+	private $query_url_type    = array('GET','DELETE','HEAD','OPTIONS');
 
-
+	/**
+	* Arreglo con los metodos que no necesitan content-length
+	* @var array
+	*/	
+	private $no_content_length = array('PATCH','DELETE','OPTIONS','HEAD');
 
 
 	/**
@@ -32,65 +36,44 @@ class CurlPhp extends CurlPhpBase
 	private function ejecutar($tipo,$url,$data = array(),$success = NULL,$error = NULL,$complete = NULL)
 	{
 
-		$this->defineConexion('GET',$url, $data);
+		$this->defineConexion($tipo,$url, $data);
 
-		if(!!in_array($tipo, $this->query_url_type)){
+		if(!!in_array($tipo, $this->query_url_type))
+		{
 
 			$this->definirOpcionCuRL(CURLOPT_HTTPGET, true);	
 		}
 
-		//get
-		
-		
-		
+		if (empty($data)||in_array($tipo, $this->no_content_length))
+		{
 
-		//post
-
-		if (is_array($data) && empty($data)) {
 			$this->eliminarCabecera('Content-Length');
+
 		}
 
-		
-		
-		//put
+		if($tipo == 'HEAD')
+		{
 
-		if(is_null($this->optenerOpcionCuRL(CURLOPT_INFILE))&&is_null($this->optenerOpcionCuRL(CURLOPT_INFILE))){
-			$this->definirCabeceras('Content-Length', strlen(http_build_query($data)));
+			$this->definirOpcionCuRL(CURLOPT_NOBODY, true);
+
 		}
-
 		
-		
+		$resultado = $this->ejecurtarCurl();
 
-		//patch
+		if(!!$resultado->errores->error){
 
-		$this->eliminarCabecera('Content-Length');
+			$ejecución = $this->ejecutarFuncion($error, $resultado->errores);
 
-				
+		}
+		else{
 
-		//delete
+			$ejecución = $this->ejecutarFuncion($success, $resultado->respuesta);	
 
-		$this->eliminarCabecera('Content-Length');
+		}
+	
+       	$this->ejecutarFuncion($complete, $respuesta,$resultado->errores);
 
-				
-
-
-		//head
-
-		$this->definirOpcionCuRL(CURLOPT_NOBODY, true);
-
-				
-
-
-		//options
-
-
-		$this->eliminarCabecera('Content-Length');
-
-				
-
-
-
-		return $this->ejecutar($success,$error,$complete);
+        return $ejecución;
 
 	}
 
@@ -99,131 +82,120 @@ class CurlPhp extends CurlPhpBase
 	* Permite realizar una conexion con el metodo GET
 	* @param String $url Cadena con la url de la conexión
 	* @param Array $data Arreglo asociativo con los parametros que se desean enviar
-* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
-* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
-* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
-* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
-*/
-public function get($url,$data = array(),$success = NULL,$error = NULL,$complete = NULL){
+	* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
+	* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
+	* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
+	* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
+	*/
+	public function get($url,$data = array(),$success = NULL,$error = NULL,$complete = NULL)
+	{
 
-$this->defineConexion('GET',$url, $data);
-$this->definirOpcionCuRL(CURLOPT_HTTPGET, true);
-return $this->ejecutar($success,$error,$complete);
-}
+		return $this->ejecutar('GET',$url,$data,$success,$error,$complete);
+	}
 
-/**
-* Permite realizar una conexion con el metodo POST
-* @param String $url Cadena con la url de la conexión
-* @param Array $data Arreglo asociativo con los parametros que se desean enviar
-* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
-* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
-* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
-* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
-*/
-public function post($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
-{
-if (is_array($data) && empty($data)) {
-$this->eliminarCabecera('Content-Length');
-}
+	/**
+	* Permite realizar una conexion con el metodo POST
+	* @param String $url Cadena con la url de la conexión
+	* @param Array $data Arreglo asociativo con los parametros que se desean enviar
+	* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
+	* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
+	* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
+	* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
+	*/
+	public function post($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
+	{
 
-$this->defineConexion('POST',$url, $data);
+		return $this->ejecutar('POST',$url,$data,$success,$error,$complete);
 
-return $this->ejecutar($success,$error,$complete);
-}
+	}
 
-/**
-* Permite realizar una conexion con el metodo PUT
-* @param String $url Cadena con la url de la conexión
-* @param Array $data Arreglo asociativo con los parametros que se desean enviar
-* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
-* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
-* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
-* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
-*/
-public function put($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
-{
+	/**
+	* Permite realizar una conexion con el metodo PUT
+	* @param String $url Cadena con la url de la conexión
+	* @param Array $data Arreglo asociativo con los parametros que se desean enviar
+	* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
+	* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
+	* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
+	* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
+	*/
+	public function put($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
+	{
 
-if(is_null($this->optenerOpcionCuRL(CURLOPT_INFILE))&&is_null($this->optenerOpcionCuRL(CURLOPT_INFILE))){
-$this->definirCabeceras('Content-Length', strlen(http_build_query($data)));
-}
+		return $this->ejecutar('PUT',$url,$data,$success,$error,$complete);
 
-$this->defineConexion('PUT',$url, $data);
+	}
 
-return $this->ejecutar($success,$error,$complete);
-}
+	/**
+	* Permite realizar una conexion con el metodo PATCH
+	* @param String $url Cadena con la url de la conexión
+	* @param Array $data Arreglo asociativo con los parametros que se desean enviar
+	* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
+	* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
+	* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
+	* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
+	*/
+	public function patch($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
+	{
 
-/**
-* Permite realizar una conexion con el metodo PATCH
-* @param String $url Cadena con la url de la conexión
-* @param Array $data Arreglo asociativo con los parametros que se desean enviar
-* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
-* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
-* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
-* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
-*/
-public function patch($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
-{
-$this->eliminarCabecera('Content-Length');
+		return $this->ejecutar('PATCH',$url,$data,$success,$error,$complete);
 
-$this->defineConexion('PATCH',$url, $data);
-return $this->ejecutar($success,$error,$complete);
-}
+	}
 
-/**
-* Permite realizar una conexion con el metodo DELETE
-* @param String $url Cadena con la url de la conexión
-* @param Array $data Arreglo asociativo con los parametros que se desean enviar
-* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
-* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
-* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
-* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
-*/
-public function delete($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
-{
+	/**
+	* Permite realizar una conexion con el metodo DELETE
+	* @param String $url Cadena con la url de la conexión
+	* @param Array $data Arreglo asociativo con los parametros que se desean enviar
+	* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
+	* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
+	* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
+	* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
+	*/
+	public function delete($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
+	{
 
-$this->eliminarCabecera('Content-Length');
+		return $this->ejecutar('DELETE',$url,$data,$success,$error,$complete);
 
-$this->defineConexion('DELETE',$url, $data);
-return $this->ejecutar($success,$error,$complete);
+	}
 
-}
+	/**
+	* Permite realizar una conexion con el metodo HEAD
+	* @param String $url Cadena con la url de la conexión
+	* @param Array $data Arreglo asociativo con los parametros que se desean enviar
+	* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
+	* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
+	* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
+	* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
+	*/
+	public function head($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
+	{
 
-/**
-* Permite realizar una conexion con el metodo HEAD
-* @param String $url Cadena con la url de la conexión
-* @param Array $data Arreglo asociativo con los parametros que se desean enviar
-* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
-* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
-* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
-* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
-*/
-public function head($url, $data = array(),$success = NULL,$error = NULL,$complete = NULL)
-{
-$this->definirOpcionCuRL(CURLOPT_NOBODY, true);
+		return $this->ejecutar('HEAD',$url,$data,$success,$error,$complete);
 
-$this->defineConexion('HEAD',$url, $data);
-return $this->ejecutar($success,$error,$complete);
+	}
 
-}
+	/**
+	* Permite realizar una conexion con el metodo OPTIONS
+	* @param String $url Cadena con la url de la conexión
+	* @param Array $data Arreglo asociativo con los parametros que se desean enviar
+	* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
+	* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
+	* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
+	* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
+	*/
+	public function options($url, $data = array())
+	{
 
-/**
-* Permite realizar una conexion con el metodo OPTIONS
-* @param String $url Cadena con la url de la conexión
-* @param Array $data Arreglo asociativo con los parametros que se desean enviar
-* @param Callable $success Funcion que debe ejecutarse en caso de que la petición sea exitosa
-* @param Callable $error Funcion que debe ejecutarse en caso de error en la petición
-* @param Callable $complete Funcion que debe ejecutarse cuando la petición culmina sin importar si fue exitosa o no
-* @return mixto El valor que se desea devolver desdela funcion success o error segun sea el caso
-*/
-public function options($url, $data = array())
-{
+		return $this->ejecutar('OPTIONS',$url,$data,$success,$error,$complete);
 
-$this->eliminarCabecera('Content-Length');
+	}
 
-$this->defineConexion('DELETE',$url, $data);
-return $this->ejecutar($success,$error,$complete);
-
-}
+	/**
+	 * Permite definir los parametyros de la conexión
+	 * @param  string     $tipo     Cadena con el nombre del metodo de conexión
+	 * @param  string     $url      Cadena con la url de conexión
+	 * @param  array      $data     Arreglo asociativo con los parametros quer se desean enviar
+	 * @return void
+	 */
 	private function defineConexion($tipo,$url,$data=array()){
 
 		$data = $this->preparaData($data);
@@ -240,6 +212,12 @@ return $this->ejecutar($success,$error,$complete);
 		}
 	}
 
+	/**
+	 * Permite preparar la url segun el metodo de la solicitud
+	 * @param  string     $url      Cadena con la url de la solicitud
+	 * @param  array      $data     Arreglo asociativo con los parametros a enviar
+	 * @return string               Cadena con la url de la solicitud
+	 */
 	private function prepararURL($url, $data)
 	{
 
@@ -290,5 +268,19 @@ return $this->ejecutar($success,$error,$complete);
 		return !!file_exists(preg_replace('/^@/', '', $valor));
 
 	}
+
+	/**
+     * Permite ejecutar una funcion,los parametros deben ser pasados inmediatamente despues de la funcion a ejecutar
+     * @param  callable     $funcion     Funcion que se desea ejecutar
+     */
+    private function ejecutarFuncion($funcion)
+    {
+        if (is_callable($funcion)) {
+            $args = func_get_args();
+            array_shift($args);
+            return call_user_func_array($funcion, $args);
+        }
+        return NULL;
+    }
 }
 ?>
