@@ -6,7 +6,7 @@ use CurlPhp\Core\CurlPhpMensajes as MSG;
 use CurlPhp\Core\CurlPhpCabeceras;
 use CurlPhp\Core\CurlPhpError;
 use CurlPhp\Core\CurlPhpRespuesta;
-  
+
 
 /**
 * Clase que contiene los metodoa base de la conexión cURL
@@ -177,7 +177,7 @@ class CurlPhpBase extends CurlPhpCabeceras
     }
 
     /**
-     * Permite importar Cookies desde un archivo 
+     * Permite importar Cookies desde un archivo
      * @param  String     $cookie_file     Cadena de texto con la ruta del archivo que se desea importar
      * @return CurlPhp
      */
@@ -196,7 +196,7 @@ class CurlPhpBase extends CurlPhpCabeceras
     {
         $this->definirOpcionCuRL(CURLOPT_COOKIEJAR, $cookie_jar);
         return $this;
-    }   	
+    }
 
    	/**
    	* Permite eliminar cabeceras de la conexión
@@ -229,9 +229,16 @@ class CurlPhpBase extends CurlPhpCabeceras
 
     $cabeceras = '';
 
-    if (!(strpos($this->respuesta_pura, "\r\n\r\n") === false)) {
+    if (!(strpos($this->respuesta_pura, "\r\n\r\n") === false))
+    {
+      $respuesta_pura_procesada = explode("\r\n\r\n", trim($this->respuesta_pura));
 
-      list($cabeceras,$this->cuerpo_respuesta) = explode("\r\n\r\n", trim($this->respuesta_pura));
+      if(count($respuesta_pura_procesada)>2)
+      {
+        $respuesta_pura_procesada = array($respuesta_pura_procesada[1],$respuesta_pura_procesada[2]);
+      }
+
+      list($cabeceras,$this->cuerpo_respuesta) = $respuesta_pura_procesada;
 
     }
 

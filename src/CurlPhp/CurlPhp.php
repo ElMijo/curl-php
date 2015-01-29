@@ -10,7 +10,7 @@ use CurlPhp\Core\CurlPhpBase;
 */
 class CurlPhp extends CurlPhpBase
 {
-		
+
 	/**
 	* Arreglo con los metodos que usan query-uri en su url
 	* @var array
@@ -20,7 +20,7 @@ class CurlPhp extends CurlPhpBase
 	/**
 	* Arreglo con los metodos que no necesitan content-length
 	* @var array
-	*/	
+	*/
 	private $no_content_length = array('PATCH','DELETE','OPTIONS','HEAD');
 
 
@@ -41,7 +41,7 @@ class CurlPhp extends CurlPhpBase
 		if(!!in_array($tipo, $this->query_url_type))
 		{
 
-			$this->definirOpcionCuRL(CURLOPT_HTTPGET, true);	
+			$this->definirOpcionCuRL(CURLOPT_HTTPGET, true);
 		}
 
 		if (empty($data)||in_array($tipo, $this->no_content_length))
@@ -57,7 +57,7 @@ class CurlPhp extends CurlPhpBase
 			$this->definirOpcionCuRL(CURLOPT_NOBODY, true);
 
 		}
-		
+
 		$resultado = $this->ejecurtarCurl();
 
 		if(!!$resultado->errores->error){
@@ -67,10 +67,10 @@ class CurlPhp extends CurlPhpBase
 		}
 		else{
 
-			$ejecución = $this->ejecutarFuncion($success, $resultado->respuesta);	
+			$ejecución = $this->ejecutarFuncion($success, $resultado->respuesta);
 
 		}
-	
+
        	$this->ejecutarFuncion($complete, $respuesta,$resultado->errores);
 
         return $ejecución;
@@ -198,7 +198,12 @@ class CurlPhp extends CurlPhpBase
 	 */
 	private function defineConexion($tipo,$url,$data=array()){
 
-		$data = $this->preparaData($data);
+		if(!!in_array($tipo, $this->query_url_type))
+		{
+
+			$data = $this->preparaData($data);
+
+		}
 
 		$this->definirOpcionCuRL(CURLOPT_URL, $this->prepararURL($url,$data));
 
@@ -254,7 +259,11 @@ class CurlPhp extends CurlPhpBase
 
 		}
 
-		return $datos_binarios==0?'?'.http_build_query($data):$data;
+		$query = '?'.http_build_query($data);
+
+		$query = $query=='?'?'':$query;
+
+		return $datos_binarios==0?$query:$data;
 	}
 
 	/**
