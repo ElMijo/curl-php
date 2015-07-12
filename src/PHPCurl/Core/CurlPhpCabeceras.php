@@ -1,9 +1,9 @@
 <?php
-namespace CurlPhp\Core;
+namespace PHPTools\PHPCurl\Core;
 /**
 * Clase que se encarga de manipular las cabeceras de un objeto curl
 */
-class CurlPhpCabeceras
+class PHPCurlCabeceras
 {
 
     /**

@@ -11,7 +11,7 @@ use CurlPhp\Core\CurlPhpRespuesta;
 /**
 * Clase que contiene los metodoa base de la conexión cURL
 */
-class CurlPhpBase extends CurlPhpCabeceras
+class PHPCurlBase extends CurlPhpCabeceras
 {
 	/**
  	* Versión de la clase

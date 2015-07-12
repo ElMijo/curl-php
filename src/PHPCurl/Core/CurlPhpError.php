@@ -1,11 +1,11 @@
 <?php
 
-namespace CurlPhp\Core;
+namespace PHPTools\PHPCurl;
 
 /**
 * Clase para procesar los posibles errores de la conexión Curl
 */
-class CurlPhpError
+class PHPCurlError
 {
 	/**
      * Codigo cURL de error

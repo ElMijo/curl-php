@@ -1,9 +1,9 @@
 <?php
-namespace CurlPhp\Core;
+namespace PHPTools\PHPCurl\Core;
 /**
 * Clase para generar la respuesta de la petición CuRL
 */
-class CurlPhpRespuesta
+class PHPCurlRespuesta
 {
 	
 	/**

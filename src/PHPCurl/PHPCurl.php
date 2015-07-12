@@ -1,6 +1,6 @@
 <?php
 
-namespace CurlPhp;
+namespace PHPTools\PHPCurl;
 
 use CurlPhp\Core\CurlPhpBase;
 
@@ -8,7 +8,7 @@ use CurlPhp\Core\CurlPhpBase;
 /**
 * Clase que permite  el consumo de los servicios cURL
 */
-class CurlPhp extends CurlPhpBase
+class PHPCurl extends CurlPhpBase
 {
 
 	/**

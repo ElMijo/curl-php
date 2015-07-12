@@ -1,10 +1,10 @@
 {
-    "name":"ElMijo/curl-php",
+    "name":"ElMijo/php-curl-client",
     "description": "Librebia para el uso de Curl",
     "keywords": ["php","curl"],
-    "homepage": "https://github.com/ElMijo/curl-php",
+    "homepage": "https://github.com/ElMijo/php-curl-client",
     "time": "2014-07-26",
-    "license": "GPL-3.0+",
+    "license": "MIT",
     "authors": [
         {
             "name": "Jerry Anselmi",
@@ -14,11 +14,15 @@
     ],
     "require": {
         "php":">=5.3",
-        "ext-json":">=1.2"
+        "ext-json":">=1.2",
+        "elmijo/php-error-log": "^2.0"
+    },
+    "require-dev": {
+        "satooshi/php-coveralls": "dev-master"
     },
     "autoload": {
-        "psr-0": {
-            "": "src/"
+        "psr-4": {
+            "PHPTools\\PHPCurlClient\\":"src/PHPCurlClient/"
         }
     }
 
