@@ -42,7 +42,7 @@ class PHPCurlClientHeader
         return array_map(function($key,$value){return "$key : $value";},$keys,$values);
     }
 
-    protected function extraerCabeceras($headers)
+    protected function extractHeaders($headers)
     {
 
         $this->request_headers = $this->extractRequestHeaders();
