@@ -3,8 +3,9 @@
     "description": "Librebia para el uso de Curl",
     "keywords": ["php","curl"],
     "homepage": "https://github.com/ElMijo/php-curl-client",
-    "time": "2014-07-26",
+    "time": "2015-07-12",
     "license": "MIT",
+    "type": "library",
     "authors": [
         {
             "name": "Jerry Anselmi",
