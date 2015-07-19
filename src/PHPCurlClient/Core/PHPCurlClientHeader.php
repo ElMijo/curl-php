@@ -61,7 +61,7 @@ class PHPCurlClientHeader
     {
         $headers =  preg_split(
             '/\r\n/',
-            curl_getinfo($this->curl, CURLINFO_HEADER_OUT), 
+            $this->getInfo(CURLINFO_HEADER_OUT), 
             NULL, 
             PREG_SPLIT_NO_EMPTY
         );

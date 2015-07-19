@@ -12,7 +12,7 @@ namespace PHPTools\PHPCurlClient;
 /**
 * Clase cliente cURL.
 */
-class PHPCurlClient extends PHPTools\PHPCurlClient\Request\PHPCurlClientRequest
+class PHPCurlClient extends \PHPTools\PHPCurlClient\Request\PHPCurlClientRequest
 {
     /**
      * Metodo que permite realizar n petición de tipo GET

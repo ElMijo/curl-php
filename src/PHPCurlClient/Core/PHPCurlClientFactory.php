@@ -14,7 +14,7 @@ use PHPTools\PHPCurlClient\Core\PHPCurlClientMessage as MSG;
 /**
 * Clase que contiene los metodoa base de la conexión cURL
 */
-class PHPCurlClientFactory extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
+class PHPCurlClientFactory extends \PHPTools\PHPCurlClient\Core\PHPCurlClientHeader
 {
     /**
      * Versión de la clase
@@ -81,7 +81,7 @@ class PHPCurlClientFactory extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
         }
 
         $this->curl = curl_init();
-        $this->logger = new PHPTools\PHPErrorLog\PHPErrorLog();
+        $this->logger = new \PHPTools\PHPErrorLog\PHPErrorLog();
 
         $this->setDefaultUserAgent();
         $this->setOpt(CURLINFO_HEADER_OUT, true);
@@ -106,7 +106,7 @@ class PHPCurlClientFactory extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
     final public function setOpt($option, $value)
     {
 
-        $set_opt = False,
+        $set_opt = False;
         if (in_array($option, array_keys($this->default_options), true) && !($value === true))
         {
             $msg = sprintf(MSG::OPCION_NECESARIA,$this->default_options[$option],PEL_WARNING);
@@ -304,5 +304,10 @@ class PHPCurlClientFactory extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
             $this->response_headers,
             $this->body_response
         );
+    }
+
+    protected function getInfo($opt)
+    {
+        return curl_getinfo($this->curl, $opt);
     }
 }

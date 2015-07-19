@@ -7,7 +7,7 @@
  * @copyright 2015 Jerry Anselmi.
  */
 
-namespace PHPTools\PHPCurlClient\Core;
+namespace PHPTools\PHPCurlClient\Response;
 
 /**
 * Clase que contiene los metodoa base de la conexión cURL
@@ -65,8 +65,8 @@ class PHPCurlClientResponse
 
     function __construct($curl, $request_headers,$response_headers,$body)
     {
-        $this->request_headers = $request;
-        $this->response_headers = $response;
+        $this->request_headers = $request_headers;
+        $this->response_headers = $response_headers;
         $this->body = $body;
 
         $this->error = new \PHPTools\PHPCurlClient\Response\PHPCurlClientError($curl,$response_headers);
