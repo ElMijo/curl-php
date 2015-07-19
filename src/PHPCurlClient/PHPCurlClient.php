@@ -12,11 +12,7 @@ namespace PHPTools\PHPCurlClient;
 /**
 * Clase cliente cURL.
 */
-class PHPCurlClient extends AnotherClass
+class PHPCurlClient extends PHPTools\PHPCurlClient\Core\PHPCurlClientBase
 {
 	
-	function __construct(argument)
-	{
-		# code...
-	}
 }

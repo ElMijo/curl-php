@@ -59,7 +59,7 @@ class PHPCurlClientResponse
 
     /**
      * Objeto error
-     * @var \PHPTools\PHPCurlClient\Core\PHPCurlClientError
+     * @var \PHPTools\PHPCurlClient\Response\PHPCurlClientError
      */
     public $error;
 
@@ -69,13 +69,14 @@ class PHPCurlClientResponse
         $this->response_headers = $response;
         $this->body = $body;
 
-        $this->error = new \PHPTools\PHPCurlClient\Core\PHPCurlClientError($curl,$response_headers);
+        $this->error = new \PHPTools\PHPCurlClient\Response\PHPCurlClientError($curl,$response_headers);
 
         $this->parserBody();
     }
 
     /**
      * Permite procesar el cuerpo de la respuesta y separar las cabeceras del curpo de la respuesta
+     * @return void
      */
     private function parserBody()
     {
