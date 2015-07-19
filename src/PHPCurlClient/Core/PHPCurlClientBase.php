@@ -14,7 +14,7 @@ use PHPTools\PHPCurlClient\Core\PHPCurlClientMessage as MSG;
 /**
 * Clase que contiene los metodoa base de la conexión cURL
 */
-class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
+class PHPCurlClientFactory extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
 {
     /**
      * Versión de la clase
@@ -97,40 +97,13 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
         }
     }
 
-    protected function exec()
-    {
-        $this->raw_response = curl_exec($this->curl);
-
-        $cabeceras = '';
-
-        if (!(strpos($this->raw_response, "\r\n\r\n") === false))
-        {
-          $parse_raw_response = explode("\r\n\r\n", trim($this->raw_response));
-
-            if(count($parse_raw_response)>2)
-            {
-                $parse_raw_response = array($parse_raw_response[1],$parse_raw_response[2]);
-            }
-            list($cabeceras,$this->body_response) = $parse_raw_response;
-        }
-
-        $this->extractHeaders($cabeceras);
-
-        return new \PHPTools\PHPCurlClient\Core\PHPCurlClientResponse(
-            $this->curl,
-            $this->request_headers,
-            $this->response_headers,
-            $this->body_response
-        );
-    }
-
     /**
      * Permite definir opociones propias de CuRL
      * @param string                     $option     Cadena con el nombre de la opcion que se desea definir
      * @param string|Boolean|Numeric     $value      Valor que se desea definir
      * @param Boolean                                Devuelve TRUE si la operacion se realizo corectamente o FALSE en caso contrario
      */
-    public function setOpt($option, $value)
+    final public function setOpt($option, $value)
     {
 
         $set_opt = False,
@@ -154,7 +127,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  string                          $option     Cadena con el nombre de la opcion que se desea obtener
      * @return string|Boolean|Numeric|NULL     $value      Devuelve el Valor definido o NULL en caso de no estar definido
      */
-    public function getOpt($option)
+    final public function getOpt($option)
     {
         return isset($this->opciones[$option])?$this->options[$option]:NULL;
     }
@@ -164,7 +137,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  array     $cabeceras     Arreglo asociativo de Cabeceras
      * @return CurlPhp
      */
-    public function addHeader($headers = array())
+    final public function addHeader($headers = array())
     {
         if($this->is_array_assoc($headers))
         {
@@ -180,7 +153,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  String     $key     Cadena con el nombre de la cabecera a eliminar
      * @return CurlPhp
      */
-    public function removeHeader($key)
+    final public function removeHeader($key)
     {
         if(!empty($key))
         {
@@ -197,7 +170,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  string     $password       Cadena con la clave
      * @return self
      */
-    public function setBasicAuth($username, $password)
+    final public function setBasicAuth($username, $password)
     {
         if(!empty($username)&&!empty($password))
         {
@@ -212,7 +185,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  string     $referrer     Cadena con la url que se desea asignar como referrer
      * @return self
      */
-    public function setReferrer($referrer)
+    final public function setReferrer($referrer)
     {
         if(!empty($referrer))
         {
@@ -227,7 +200,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  string     $value     Cadena con el valor de la cookie
      * @return self
      */
-    public function definirCookie($key, $value)
+    final public function setCookie($key, $value)
     {
         if(!empty($key)&&!empty($value))
         {
@@ -242,7 +215,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  string     $cookie_file     Cadena de texto con la ruta del archivo que se desea importar
      * @return self
      */
-    public function definirCookieFile($cookie_file)
+    final public function setCookieFile($cookie_file)
     {
         if(!empty($cookie_file)&&!!file_exists($cookie_file))
         {
@@ -256,7 +229,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  string     $cookie_jar     Cadena de texto con la ruta del archivo donde se desea almacenar las Cookies
      * @return self
      */
-    public function definirCookieJar($cookie_jar)
+    final public function setCookieJar($cookie_jar)
     {
         if(!empty($cookie_jar)&&!!file_exists($cookie_jar))
         {
@@ -270,7 +243,7 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  string     $user_agent     Cadena cvon el User Agent
      * @return self
      */
-    public function setUserAgent($user_agent = '')
+    final public function setUserAgent($user_agent = '')
     {
 
         $this->setOpt(CURLOPT_USERAGENT, $user_agent);
@@ -297,8 +270,39 @@ class PHPCurlClientBase extends \PHPTools\PHPErrorLog\PHPCurlClientHeader
      * @param  Array      $array     Arreglo que se desea evaluar
      * @return boolean               Devuelve TRUE si el arreglo es asociativo o FAÑSE en caso contrario
      */
-    private function is_array_assoc($array = array())
+    protected function is_array_assoc($array = array())
     {
         return (bool)count(array_filter(array_keys($array), 'is_string'));
+    }
+
+    /**
+     * Permite ejecuttar la onsulta cURL
+     * @return \PHPTools\PHPCurlClient\Response\PHPCurlClientResponse
+     */
+    protected function exec()
+    {
+        $this->raw_response = curl_exec($this->curl);
+
+        $cabeceras = '';
+
+        if (!(strpos($this->raw_response, "\r\n\r\n") === false))
+        {
+            $parse_raw_response = explode("\r\n\r\n", trim($this->raw_response));
+
+            if(count($parse_raw_response)>2)
+            {
+                $parse_raw_response = array($parse_raw_response[1],$parse_raw_response[2]);
+            }
+            list($cabeceras,$this->body_response) = $parse_raw_response;
+        }
+
+        $this->extractHeaders($cabeceras);
+
+        return new \PHPTools\PHPCurlClient\Response\PHPCurlClientResponse(
+            $this->curl,
+            $this->request_headers,
+            $this->response_headers,
+            $this->body_response
+        );
     }
 }
