@@ -2,3 +2,6 @@
 .tags_sorted_by_file
 test/
 vendor/
+composer.lock
+build/
+src/bck/

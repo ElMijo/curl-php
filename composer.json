@@ -3,7 +3,6 @@
     "description": "Librebia para el uso de Curl",
     "keywords": ["php","curl"],
     "homepage": "https://github.com/ElMijo/php-curl-client",
-    "time": "2015-07-12",
     "license": "MIT",
     "type": "library",
     "authors": [
@@ -23,7 +22,7 @@
     },
     "autoload": {
         "psr-4": {
-            "PHPTools\\PHPCurlClient\\":"src/PHPCurlClient/"
+            "PhpTools\\PhpCurl\\":"src/PhpCurl/"
         }
     }
 
